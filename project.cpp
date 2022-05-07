@@ -21,12 +21,12 @@ class Board
 
 		int board[64] = {
 			5,   4,  3,  6,  1,  3,  4,  5,
+			2,   2,  2,  2,  2,  2,  2,  2,
 			0,   0,  0,  0,  0,  0,  0,  0,
 			0,   0,  0,  0,  0,  0,  0,  0,
 			0,   0,  0,  0,  0,  0,  0,  0,
 			0,   0,  0,  0,  0,  0,  0,  0,
-			0,   0,  0,  0,  0,  0,  0,  0,
-			0, 0, 0, 0, 0, 0, 0, 0,
+			-2, -2, -2, -2, -2, -2, -2, -2,
 			-5, -4, -3, -6, -1, -3, -4, -5
 		};
 
@@ -526,7 +526,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 												{
 													blocked = true;
 												}
@@ -551,7 +551,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 												{
 													blocked = true;
 												}
@@ -577,7 +577,7 @@ class Board
 													return true;
 												}
 											}
-											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 											{
 												blocked = true;
 											}
@@ -599,7 +599,7 @@ class Board
 													return true;
 												}
 											}
-											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 											{
 												blocked = true;
 											}
@@ -627,6 +627,7 @@ class Board
 													else
 													{
 														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
 														return true;
 													}
 												}
@@ -648,6 +649,7 @@ class Board
 													else
 													{
 														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
 														return true;
 													}
 												}
@@ -681,7 +683,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i!= destination && !(board[i] == 0))
 												{
 													blocked = true;	
 												}
@@ -703,7 +705,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i!= destination && !(board[i] == 0))
 												{
 													blocked = true;	
 												}
@@ -899,6 +901,94 @@ class Board
 							return false;
 							break;
 						}
+					default:
+						{
+							//pawn moves
+							//first, check for pawn captures
+							if(board[destination] != 0)
+							{
+								if((destination%8) == 0)
+								{
+									if(board[(destination-7)] == 2)
+									{
+										cout << "Capturing pawn found" << endl;
+										pieceLocation = destination-7;
+										return true;
+									}
+								}
+								else if((destination%8) == 7)
+								{
+									if(board[(destination-9)] == 2)
+									{
+										cout << "Capturing pawn found" << endl;
+										pieceLocation = destination-7;
+										return true;
+									}
+								}
+								else
+								{
+									//check specified file first
+									if(file != -1 && file >= 0 && file <= 7)
+									{
+										if(file < (destination%8))
+										{
+											if(board[destination-9] == 2)
+											{
+												cout << "Capturing pawn found" << endl;
+												pieceLocation = destination-9;
+												return true;
+											}
+										}
+										else if(file > (destination%8))
+										{
+											if(board[destination-7] == 2)
+											{
+												cout << "Capturing pawn found" << endl;
+												pieceLocation = destination-7;
+												return true;
+											}
+										}
+									}
+									else
+									{
+										if(board[destination-9] == 2)
+										{
+											cout << "Capturing pawn found" << endl;
+											pieceLocation = destination-9;
+											return true;
+										}
+										if(board[destination-7] == 2)
+										{
+											cout << "Capturing pawn found" << endl;
+											pieceLocation = destination-7;
+											return true;
+										}
+									}
+								}
+							}
+							else
+							{
+								if(board[destination-8] == 2)
+								{
+									cout << "Moving pawn found" << endl;
+									pieceLocation = destination-8;
+									return true;
+								}
+								else if(board[destination-8] != 0 && board[destination-16] == 2)
+								{
+									cout << "Pawn found, but blocked from double moving" << endl;
+									return false;
+								}
+								else if(board[destination-8] == 0 && board[destination-16] == 2 && destination >= 24 && destination <= 31)
+								{
+									cout << "Pawn found, double move" << endl;
+									pieceLocation = destination-16;
+									return true;
+								}
+							}
+							cout << "No eligable pawn found" << endl;
+							return false;
+						}
 				}
 			}
 			else //if blacks turn
@@ -1058,7 +1148,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 												{
 													blocked = true;
 												}
@@ -1083,7 +1173,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 												{
 													blocked = true;
 												}
@@ -1109,7 +1199,7 @@ class Board
 													return true;
 												}
 											}
-											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 											{
 												blocked = true;
 											}
@@ -1131,7 +1221,7 @@ class Board
 													return true;
 												}
 											}
-											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 											{
 												blocked = true;
 											}
@@ -1203,7 +1293,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 												{
 													blocked = true;
 												}
@@ -1251,7 +1341,7 @@ class Board
 													return true;
 												}
 											}
-											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 											{
 												blocked = true;
 											}
@@ -1283,7 +1373,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 												{
 													blocked = true;	
 												}
@@ -1305,7 +1395,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 												{
 													blocked = true;	
 												}
@@ -1335,7 +1425,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 												{
 													blocked = true;	
 												}
@@ -1357,7 +1447,7 @@ class Board
 														return true;
 													}
 												}
-												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												else if(i >= 0 && i <= 63 && i != destination && !(board[i] == 0))
 												{
 													blocked = true;	
 												}
@@ -1555,10 +1645,96 @@ class Board
 						}
 					default:
 						{
-							cout << "Default case" << endl;
+							//pawn moves
+							//first, check for pawn captures
+							if(board[destination] != 0)
+							{
+								if((destination%8) == 0)
+								{
+									if(board[(destination+7)] == -2)
+									{
+										cout << "Capturing pawn found" << endl;
+										pieceLocation = destination+7;
+										return true;
+									}
+								}
+								else if((destination%8) == 7)
+								{
+									if(board[(destination+9)] == -2)
+									{
+										cout << "Capturing pawn found" << endl;
+										pieceLocation = destination+7;
+										return true;
+									}
+								}
+								else
+								{
+									//check specified file first
+									if(file != -1 && file >= 0 && file <= 7)
+									{
+										if(file < (destination%8))
+										{
+											if(board[destination+9] == -2)
+											{
+												cout << "Capturing pawn found" << endl;
+												pieceLocation = destination+9;
+												return true;
+											}
+										}
+										else if(file > (destination%8))
+										{
+											if(board[destination+7] == -2)
+											{
+												cout << "Capturing pawn found" << endl;
+												pieceLocation = destination+7;
+												return true;
+											}
+										}
+									}
+									else
+									{
+										if(board[destination+9] == -2)
+										{
+											cout << "Capturing pawn found" << endl;
+											pieceLocation = destination+9;
+											return true;
+										}
+										if(board[destination+7] == -2)
+										{
+											cout << "Capturing pawn found" << endl;
+											pieceLocation = destination+7;
+											return true;
+										}
+									}
+								}
+							}
+							else
+							{
+								if(board[destination+8] == -2)
+								{
+									cout << "Moving pawn found" << endl;
+									pieceLocation = destination+8;
+									return true;
+								}
+								else if(board[destination+8] != 0 && board[destination+16] == -2)
+								{
+									cout << "Pawn found, but blocked from double moving" << endl;
+									return false;
+								}
+								else if(board[destination+8] == 0 && board[destination+16] == -2 && destination >= 32 && destination <= 39)
+								{
+									cout << "Pawn found, double move" << endl;
+									pieceLocation = destination+16;
+									return true;
+								}
+							}
+							cout << "No eligable pawn found" << endl;
+							return false;
 						}
+
 				}
 			}
+
 			//legality exception: shows move got past all cases
 			cout << "Legality exception" << endl;
 			return false;
@@ -1573,6 +1749,37 @@ class Board
 					cout << "Playing " << move << "." << endl;
 					movingBoard.board[pieceDestination] = movingBoard.board[pieceLocation];
 					movingBoard.board[pieceLocation] = 0;
+
+					//win conditon check
+					bool whiteWin = true;
+					for(int i = 0; i < 64; i++)
+					{
+						if(movingBoard.board[i] == -1)
+						{
+							whiteWin = false;
+						}
+					}
+					if(whiteWin)
+					{
+						cout << "White wins." << endl;
+						exit(0);
+					}
+
+					bool blackWin = true;
+					for(int i = 0; i < 64; i++)
+					{
+						if(movingBoard.board[i] == 1)
+						{
+							blackWin = false;
+						}
+					}
+					if(blackWin)
+					{
+						cout << "Black wins!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+						exit(0);
+					}
+
+
 					movingBoard.turn = !movingBoard.turn;
 					return true;
 				}
