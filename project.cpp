@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <string>
 using namespace std;
 
 class Board
@@ -19,14 +20,14 @@ class Board
 		// see: www.chessprogramming.org/Square_Mapping_Considerations#Little-Endian-Rank-File_Mapping
 
 		int board[64] = {
-			5,   4,  3,  6,  1,  3,  4,  5,
-			2,   0,  0,  0,  0,  0,  0,  2,
-			0,   0,  0,  0,  0,  0,  0,  0,
-			0,   0,  2,  0,  0,  2,  0,  0,
+			5,   4,  3,  6,  0,  3,  4,  5,
 			0,   0,  0,  0,  0,  0,  0,  0,
 			0,   0,  0,  0,  0,  0,  0,  0,
-			-2, 0, 0, 0, 0, 0, -2, -2,
-			-5, -4, -3, -6, -1, -3, -4, -5
+			0,   0,  0,  0,  0,  0,  0,  0,
+			0,   0,  0,  0,  0,  0,  0,  0,
+			0,   0,  0,  0,  0,  0,  0,  0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			-5, -4, -3, -6, 0, -3, -4, -5
 		};
 
 		int eval;
@@ -34,6 +35,8 @@ class Board
 		bool turn;
 		vector<Board> children;
 		int nextboard;
+		int pieceLocation = -1;
+		int pieceDestination = -1;
 
 		Board()
 		{
@@ -44,6 +47,18 @@ class Board
 
 		void printBoard()
 		{
+			if(turn)
+			{
+				cout << "White's turn" << endl;
+			}
+			else
+			{
+				cout << "Black's turn" << endl;
+			}
+
+			evaluate();
+			cout << "Evaluation: " << eval << endl;
+
 			for(int i = 0; i < 8; i++)
 			{
 				cout << 8-i << "  ";
@@ -99,8 +114,6 @@ class Board
 				cout << endl;
 			}
 			cout << endl << "   abcdefgh" << endl;
-			evaluate();
-			cout << "Evaluation: " << eval << endl;
 			if(check)
 			{
 				cout << "Check!" << endl;
@@ -235,6 +248,7 @@ class Board
 			}
 
 			cout << "Destination legal: " << destination << endl;
+			pieceDestination = destination;
 
 			//if whites turn
 			if(turn)
@@ -324,6 +338,7 @@ class Board
 												else
 												{
 													cout << "Bishop found, move legal" << endl;
+													pieceLocation = i;
 													return true;
 												}
 											}
@@ -345,6 +360,7 @@ class Board
 												else
 												{
 													cout << "Bishop found, move legal" << endl;
+													pieceLocation = i;
 													return true;
 												}
 											}
@@ -357,11 +373,471 @@ class Board
 								}
 							}
 							cout << "No bishop was found that could make that move." << endl;
-							return false; //no bishop was found	
-						}	
+							return false; //no bishop was found
+							break;	
+						}
+					case 'R':
+						{
+							int position = -1;
+							//find the rook...
+							for(int i = 0; i < 64; i++)
+							{
+								if(board[i] == 5)
+								{
+									position = i;
+									if((destination%8) == (position%8)) //if on some file
+									{
+										if((destination-position)>0)
+										{
+											bool blocked = false;
+											for(int i = destination; i >= position; i-=8)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Rook found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Rook found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;
+												}
+											}
+										}
+										else if((destination-position)<0)
+										{
+											bool blocked = false;
+											for(int i = destination; i <= position; i+=8)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Rook found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Rook found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;
+												}
+											}
+										}
+									}
+									else //same rank check
+									{
+										bool blocked = false;
+										for(int i = destination; i <= (destination+(8-(destination%8))); i++)
+										{
+											if(i == position)
+											{
+												if(blocked)
+												{
+													cout << "Rook found, but path blocked" << endl;
+													return false;
+												}
+												else
+												{
+													cout << "Rook found, move legal" << endl;
+													pieceLocation = i;
+													return true;
+												}
+											}
+											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											{
+												blocked = true;
+											}
+										}
+										blocked = false;
+										for(int i = destination; i >= (destination-(destination%8)); i--)
+										{
+											if(i == position)
+											{
+												if(blocked)
+												{
+													cout << "Rook found, but path blocked" << endl;
+													return false;
+												}
+												else
+												{
+													cout << "Rook found, move legal" << endl;
+													pieceLocation = i;
+													return true;
+												}
+											}
+											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											{
+												blocked = true;
+											}
+										}
+									}
+								}
+							}
+							cout << "No rook was found that could make that move." << endl;
+							return false; //no rook was found
+							break;
+						}
+					case 'Q':
+						{
+							int position = -1;
+							//find with "rook like movements" in cardinal directions
+							for(int i = 0; i < 64; i++)
+							{
+								if(board[i] == 6)
+								{
+									position = i;
+									if(destination == position)
+									{
+										cout << "Don't make moves to the same square." << endl;
+										return false;
+									}
+									else if((destination%8) == (position%8)) //if on some file
+									{
+										if((destination-position)>0)
+										{
+											bool blocked = false;
+											for(int i = destination; i >= position; i-=8)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;
+												}
+											}
+										}
+										else if((destination-position)<0)
+										{
+											bool blocked = false;
+											for(int i = destination; i <= position; i+=8)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;
+												}
+											}
+										}
+									}
+									else //same rank check
+									{
+										bool blocked = false;
+										for(int i = destination; i <= (destination+(8-(destination%8))); i++)
+										{
+											if(i == position)
+											{
+												if(blocked)
+												{
+													cout << "Queen found, but path blocked" << endl;
+													return false;
+												}
+												else
+												{
+													cout << "Queen found, move legal" << endl;
+													pieceLocation = i;
+													return true;
+												}
+											}
+											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											{
+												blocked = true;
+											}
+										}
+										blocked = false;
+										for(int i = destination; i >= (destination-(destination%8)); i--)
+										{
+											if(i == position)
+											{
+												if(blocked)
+												{
+													cout << "Queen found, but path blocked" << endl;
+													return false;
+												}
+												else
+												{
+													cout << "Queen found, move legal" << endl;
+													pieceLocation = i;
+													return true;
+												}
+											}
+											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											{
+												blocked = true;
+											}
+										}
+									}
+								}
+								for(int i = 0; i < 64; i++)
+								{
+									if(board[i] == 6)
+									{
+										position = i;
+										//check diagonal
+										if((position-destination)<0) //if going up board
+										{
+											bool blocked = false;
+											for(int i = destination-9; i >= position; i-=9)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;	
+												}
+											}
+											blocked = false;
+											for(int i = destination-7; i>=position; i-=7)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;	
+												}
+											}
+										}
+										else if((position-destination) == 0)
+										{
+											cout << "Don't make moves to the same position" << endl;
+											return false;
+										}
+										else //if going down board
+										{
+											bool blocked = false;
+											for(int i = destination+7; i <= position; i+=7)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;	
+												}
+											}
+											blocked = false;
+											for(int i = destination+9;i <= position; i+=9)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;	
+												}
+											}
+										}
+									}
+								}
+							}
+							cout << "No valid queen move found." << endl;
+							return false;
+							break;
+						}
+					case 'N':
+						{
+							//using knight directions compass: www.chessprogramming.org/Direction#Knight_Directions
+
+							int position = -1;
+							bool noNoWe, noNoEa, noWeWe, noEaEa, soWeWe, soEaEa, soSoWe, soSoEa;
+							noNoWe = noNoEa = noWeWe = noEaEa = soWeWe = soEaEa = soSoWe = soSoEa = true;
+
+							//rule out directions
+							if(destination >= 48)
+							{
+								noNoWe = noNoEa = false;
+							}
+							if((destination%8) < 2)
+							{
+								noWeWe = soWeWe = false;
+							}
+							if((destination%8) > 5)
+							{
+								noEaEa = soEaEa = false;
+							}
+							if(destination <= 15)
+							{
+								soSoWe = soSoEa = false;
+							}
+							if(destination >= 56)
+							{
+								noWeWe = noEaEa = false;
+							}
+							if(destination <= 7)
+							{
+								soWeWe = soEaEa = false;
+							}
+							if((destination%8) == 0)
+							{
+								noNoWe = soSoWe = false;
+							}
+							if((destination%8) == 7)
+							{
+								noNoEa = soSoEa = false;
+							}
+
+							if(noNoWe)
+							{
+								if(board[destination-15] == 4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination-15);
+									return true;
+								}
+							}
+							if(noNoEa)
+							{
+								if(board[destination-17] == 4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination-17);
+									return true;
+								}
+							}
+							if(noWeWe)
+							{
+								if(board[destination-6] == 4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination-6);
+									return true;
+								}
+							}
+							if(noEaEa)
+							{
+								if(board[destination-10] == 4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination-10);
+									return true;
+								}
+							}
+							if(soWeWe)
+							{
+								if(board[destination+10] == 4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination+10);
+									return true;
+								}
+							}
+							if(soEaEa)
+							{
+								if(board[destination+6] == 4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination+6);
+									return true;
+								}
+							}
+							if(soSoWe)
+							{
+								if(board[destination+17] == 4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination+17);
+									return true;
+								}
+							}
+							if(soSoEa)
+							{
+								if(board[destination+15] == 4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination+15);
+									return true;
+								}
+							}
+
+							cout << "Knight not found." << endl;
+							return false;
+							break;
+						}
 				}
 			}
-			else
+			else //if blacks turn
 			{
 				if(board[destination] < 0)
 				{
@@ -398,6 +874,7 @@ class Board
 												else
 												{
 													cout << "Bishop found, move legal" << endl;
+													pieceLocation = i;
 													return true;
 												}
 											}
@@ -419,6 +896,7 @@ class Board
 												else
 												{
 													cout << "Bishop found, move legal" << endl;
+													pieceLocation = i;
 													return true;
 												}
 											}
@@ -448,6 +926,7 @@ class Board
 												else
 												{
 													cout << "Bishop found, move legal" << endl;
+													pieceLocation = i;
 													return true;
 												}
 											}
@@ -469,6 +948,7 @@ class Board
 												else
 												{
 													cout << "Bishop found, move legal" << endl;
+													pieceLocation = i;
 													return true;
 												}
 											}
@@ -493,10 +973,456 @@ class Board
 								if(board[i] == -5)
 								{
 									position = i;
+									if((destination%8) == (position%8)) //if on some file
+									{
+										if((destination-position)>0)
+										{
+											bool blocked = false;
+											for(int i = destination; i >= position; i-=8)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Rook found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Rook found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;
+												}
+											}
+										}
+										else if((destination-position)<0)
+										{
+											bool blocked = false;
+											for(int i = destination; i <= position; i+=8)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Rook found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Rook found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;
+												}
+											}
+										}
+									}
+									else //same rank check
+									{
+										bool blocked = false;
+										for(int i = destination; i <= (destination+(8-(destination%8))); i++)
+										{
+											if(i == position)
+											{
+												if(blocked)
+												{
+													cout << "Rook found, but path blocked" << endl;
+													return false;
+												}
+												else
+												{
+													cout << "Rook found, move legal" << endl;
+													pieceLocation = i;
+													return true;
+												}
+											}
+											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											{
+												blocked = true;
+											}
+										}
+										blocked = false;
+										for(int i = destination; i >= (destination-(destination%8)); i--)
+										{
+											if(i == position)
+											{
+												if(blocked)
+												{
+													cout << "Rook found, but path blocked" << endl;
+													return false;
+												}
+												else
+												{
+													cout << "Rook found, move legal" << endl;
+													pieceLocation = i;
+													return true;
+												}
+											}
+											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											{
+												blocked = true;
+											}
+										}
+									}
 								}
 							}
 							cout << "No rook was found that could make that move." << endl;
 							return false; //no rook was found
+							break;
+						}
+					case 'Q':
+						{
+							int position = -1;
+							//find with "rook like movements" in cardinal directions
+							for(int i = 0; i < 64; i++)
+							{
+								if(board[i] == -6)
+								{
+									position = i;
+									if(destination == position)
+									{
+										cout << "Don't make moves to the same square." << endl;
+										return false;
+									}
+									else if((destination%8) == (position%8)) //if on some file
+									{
+										if((destination-position)>0)
+										{
+											bool blocked = false;
+											for(int i = destination; i >= position; i-=8)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;
+												}
+											}
+										}
+										else if((destination-position)<0)
+										{
+											bool blocked = false;
+											for(int i = destination; i <= position; i+=8)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;
+												}
+											}
+										}
+									}
+									else //same rank check
+									{
+										bool blocked = false;
+										for(int i = destination; i <= (destination+(8-(destination%8))); i++)
+										{
+											if(i == position)
+											{
+												if(blocked)
+												{
+													cout << "Queen found, but path blocked" << endl;
+													return false;
+												}
+												else
+												{
+													cout << "Queen found, move legal" << endl;
+													pieceLocation = i;
+													return true;
+												}
+											}
+											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											{
+												blocked = true;
+											}
+										}
+										blocked = false;
+										for(int i = destination; i >= (destination-(destination%8)); i--)
+										{
+											if(i == position)
+											{
+												if(blocked)
+												{
+													cout << "Queen found, but path blocked" << endl;
+													return false;
+												}
+												else
+												{
+													cout << "Queen found, move legal" << endl;
+													pieceLocation = i;
+													return true;
+												}
+											}
+											else if(i >= 0 && i <= 63 && !(board[i] == 0))
+											{
+												blocked = true;
+											}
+										}
+									}
+								}
+								for(int i = 0; i < 64; i++)
+								{
+									if(board[i] == -6)
+									{
+										position = i;
+										//check diagonal
+										if((position-destination)<0) //if going up board
+										{
+											bool blocked = false;
+											for(int i = destination-9; i >= position; i-=9)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;	
+												}
+											}
+											blocked = false;
+											for(int i = destination-7; i>=position; i-=7)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;	
+												}
+											}
+										}
+										else if((position-destination) == 0)
+										{
+											cout << "Don't make moves to the same position" << endl;
+											return false;
+										}
+										else //if going down board
+										{
+											bool blocked = false;
+											for(int i = destination+7; i <= position; i+=7)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;	
+												}
+											}
+											blocked = false;
+											for(int i = destination+9;i <= position; i+=9)
+											{
+												if(i == position)
+												{
+													if(blocked)
+													{
+														cout << "Queen found, but path blocked" << endl;
+														return false;
+													}
+													else
+													{
+														cout << "Queen found, move legal" << endl;
+														pieceLocation = i;
+														return true;
+													}
+												}
+												else if(i >= 0 && i <= 63 && !(board[i] == 0))
+												{
+													blocked = true;	
+												}
+											}
+										}
+									}
+								}
+							}
+							cout << "No valid queen move found." << endl;
+							return false;
+							break;
+						}
+					case 'N':
+						{
+							//using knight directions compass: www.chessprogramming.org/Direction#Knight_Directions
+
+							int position = -1;
+							bool noNoWe, noNoEa, noWeWe, noEaEa, soWeWe, soEaEa, soSoWe, soSoEa;
+							noNoWe = noNoEa = noWeWe = noEaEa = soWeWe = soEaEa = soSoWe = soSoEa = true;
+
+							//rule out directions
+							if(destination >= 48)
+							{
+								noNoWe = noNoEa = false;
+							}
+							if((destination%8) < 2)
+							{
+								noWeWe = soWeWe = false;
+							}
+							if((destination%8) > 5)
+							{
+								noEaEa = soEaEa = false;
+							}
+							if(destination <= 15)
+							{
+								soSoWe = soSoEa = false;
+							}
+							if(destination >= 56)
+							{
+								noWeWe = noEaEa = false;
+							}
+							if(destination <= 7)
+							{
+								soWeWe = soEaEa = false;
+							}
+							if((destination%8) == 0)
+							{
+								noNoWe = soSoWe = false;
+							}
+							if((destination%8) == 7)
+							{
+								noNoEa = soSoEa = false;
+							}
+
+							if(noNoWe)
+							{
+								if(board[destination-15] == -4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination-15);
+									return true;
+								}
+							}
+							if(noNoEa)
+							{
+								if(board[destination-17] == -4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination-17);
+									return true;
+								}
+							}
+							if(noWeWe)
+							{
+								if(board[destination-6] == -4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination-6);
+									return true;
+								}
+							}
+							if(noEaEa)
+							{
+								if(board[destination-10] == -4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination-10);
+									return true;
+								}
+							}
+							if(soWeWe)
+							{
+								if(board[destination+10] == -4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination+10);
+									return true;
+								}
+							}
+							if(soEaEa)
+							{
+								if(board[destination+6] == -4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination+6);
+									return true;
+								}
+							}
+							if(soSoWe)
+							{
+								if(board[destination+17] == -4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination+17);
+									return true;
+								}
+							}
+							if(soSoEa)
+							{
+								if(board[destination+15] == -4)
+								{
+									cout << "Knight found" << endl;
+									pieceLocation = (destination+15);
+									return true;
+								}
+							}
+
+							cout << "Knight not found." << endl;
+							return false;
 							break;
 						}
 					default:
@@ -509,17 +1435,49 @@ class Board
 			cout << "Legality exception" << endl;
 			return false;
 		}
+
+		bool playMove(Board& movingBoard, string move)
+		{
+			if(legalCheck(move))
+			{
+				if(pieceLocation != -1 && pieceDestination != -1)
+				{
+					cout << "Playing " << move << "." << endl;
+					movingBoard.board[pieceDestination] = movingBoard.board[pieceLocation];
+					movingBoard.board[pieceLocation] = 0;
+					movingBoard.turn = !movingBoard.turn;
+					return true;
+				}
+				else
+				{
+					cout << "Location or destination not set." << endl;
+					return false;
+				}
+			}
+			else
+			{
+				cout << "Move not legal" << endl;
+				return false;
+			}
+		}
 };
 
 int main()
 {
 	Board testBoard;
-	testBoard.printBoard();
-	testBoard.legalCheck("Bd3");
-	testBoard.legalCheck("Bb1");
-	testBoard.legalCheck("Ba6");
-	testBoard.legalCheck("Bb5");
-
-	testBoard.turn = false;
-	testBoard.legalCheck("Bd7");
+	string input;
+	while(input != "quit")
+	{
+		testBoard.printBoard();
+		cout << "Make move: ";
+		getline(cin, input);
+		if(testBoard.legalCheck(input))
+		{
+			Board newBoard = testBoard;
+			if(newBoard.playMove(newBoard, input))
+			{
+				testBoard.playMove(testBoard, input);
+			}
+		}
+	}
 }
