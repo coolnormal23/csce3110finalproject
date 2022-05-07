@@ -20,14 +20,14 @@ class Board
 		// see: www.chessprogramming.org/Square_Mapping_Considerations#Little-Endian-Rank-File_Mapping
 
 		int board[64] = {
-			5,   4,  3,  6,  0,  3,  4,  5,
+			5,   4,  3,  6,  1,  3,  4,  5,
 			0,   0,  0,  0,  0,  0,  0,  0,
 			0,   0,  0,  0,  0,  0,  0,  0,
 			0,   0,  0,  0,  0,  0,  0,  0,
 			0,   0,  0,  0,  0,  0,  0,  0,
 			0,   0,  0,  0,  0,  0,  0,  0,
 			0, 0, 0, 0, 0, 0, 0, 0,
-			-5, -4, -3, -6, 0, -3, -4, -5
+			-5, -4, -3, -6, -1, -3, -4, -5
 		};
 
 		int eval;
@@ -835,6 +835,70 @@ class Board
 							return false;
 							break;
 						}
+					case 'K':
+						{
+							int position = -1;
+							if(board[(destination-1)] == 1)
+							{
+								position = destination-1;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination-7)] == 1)
+							{
+								position = destination-7;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination-8)] == 1)
+							{
+								position = destination-8;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination-9)] == 1)
+							{
+								position = destination-9;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination+1)] == 1)
+							{
+								position = destination+1;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination+7)] == 1)
+							{
+								position = destination+7;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination+8)] == 1)
+							{
+								position = destination+8;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination+9)] == 1)
+							{
+								position = destination+9;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+
+							cout << "King not found" << endl;
+							return false;
+							break;
+						}
 				}
 			}
 			else //if blacks turn
@@ -1422,6 +1486,70 @@ class Board
 							}
 
 							cout << "Knight not found." << endl;
+							return false;
+							break;
+						}
+					case 'K':
+						{
+							int position = -1;
+							if(board[(destination-1)] == -1)
+							{
+								position = destination-1;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination-7)] == -1)
+							{
+								position = destination-7;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination-8)] == -1)
+							{
+								position = destination-8;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination-9)] == -1)
+							{
+								position = destination-9;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination+1)] == -1)
+							{
+								position = destination+1;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination+7)] == -1)
+							{
+								position = destination+7;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination+8)] == -1)
+							{
+								position = destination+8;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+							else if(board[(destination+9)] == -1)
+							{
+								position = destination+9;
+								pieceLocation = position;
+								cout << "King found" << endl;
+								return true;
+							}
+
+							cout << "King not found" << endl;
 							return false;
 							break;
 						}
