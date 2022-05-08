@@ -1,4 +1,6 @@
 # CSCE 3110 Final Project
+Compile: g++ project.cpp
+
 Basic chess implementation with C++. No checks, but pieces move as expected and has a full 8x8 board, and the game can be won (by taking the opponent's king.) 
 Parses and makes moves using algebaric notation (https://en.wikipedia.org/wiki/Algebraic_notation).
 
